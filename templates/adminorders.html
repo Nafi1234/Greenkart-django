@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Green Kart Admin Panel</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+  <style>
+    body, nav {
+      margin-top: 0;
+      padding-top: 0;
+    }
+    .navbar {
+      background-color: #000;
+    }
+    .sidebar {
+      width: 250px;
+      height: 750px;
+      background-color: #866ec7;
+      padding: 20px;
+      color: #fff;
+    }
+    .sidebar h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      margin-bottom: 10px;
+    }
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Green Kart</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="sidebar">
+          <h1>Green Kart</h1>
+          <ul>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'adminproduct' %}">Products</a></li>
+            <li><a href="{% url 'adminorder' %}">Orders</a></li>
+            <li><a href="{% url 'user_mangement' %}">Users</a></li>
+            <li><a href= "{% url 'list_variations' %}"></li>Variations<a><li>
+              <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
+              <li><a href="{% url 'adminwallet' %}">Wallet</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <table class="table table-striped table-bordered" id="orderTable">
+          <thead>
+            <tr>
+              <th>Order Number</th>
+              <th>User</th>
+              <th>Product</th>
+              <th>Billing address</th>
+              <th>Order Total</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>View details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Iterate over your orders and populate the table rows dynamically -->
+            {% for order_product in order_products %}
+            {% for order_item in order_product.orderproduct_set.all %}
+              <tr>
+                <td>{{ order_product.order_number }}</td>
+                <td>{{ order_product.user }}</td>
+                <td>{{ order_item.product }}</td>
+                <td> {{ order_product.first_name}}<br>
+                  {{ order_product.address_line_1 }},
+                  {{ order_product.city}}
+                </td>
+                <td>{{ order_product.order_total }}</td>
+                <td>{{ order_item.quantity }}</td>
+                <td>
+                  <select class="form-control" onchange="changeStatus('{{ order_product.order_number }}', this.value)">
+                    {% for status in order_product.STATUS %}
+                      <option value="{{ status.0 }}" {% if order_product.status == status.0 %} selected {% endif %}>{{ status.1 }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                  <a href="{% url 'order-details' order_product.order_number %}">View details</a>
+                </td>
+              </tr>
+            {% endfor %}
+            {% endfor %}
+            <!-- If there are no orders, display a message -->
+            {% if orders %}
+              <tr>
+                <td colspan="6">No orders available</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#orderTable').DataTable();
+    });
+
+    function changeStatus(orderNumber, newStatus) {
+      $.ajax({
+        type: 'POST',
+        url: '{% url "adminorder" %}',
+        data: {
+          order_number: orderNumber,
+          new_status: newStatus,
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response) {
+          // Handle the success response
+          console.log('Status updated successfully');
+        },
+        error: function(xhr, errmsg, err) {
+          // Handle the error response
+          console.log('An error occurred while updating the status');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

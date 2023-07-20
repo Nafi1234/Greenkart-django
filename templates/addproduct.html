@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Green Kart Admin Panel</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <style>
+    body, nav {
+      margin-top: 0;
+      padding-top: 0;
+    }
+    .navbar {
+      background-color: #000;
+    }
+    .sidebar {
+      width: 250px;
+      height: 100%;
+      background-color: #866ec7;
+      padding: 20px;
+      color: #fff;
+    }
+    .sidebar h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      margin-bottom: 10px;
+    }
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .table th,
+    .table td {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Green Kart</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="sidebar">
+          <h1>Green Kart</h1>
+          <ul>
+            <li><a href="#">Dashboard</a></li>
+            <li>
+              <a href="#productsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Products</a>
+              <ul class="collapse list-unstyled" id="productsSubmenu">
+                <li><a href="#">Categories</a></li>
+                <li><a href="#">Products</a></li>
+              </ul>
+            </li>
+            <li><a href="#">Orders</a></li>
+            <li><a href="#">Users</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <h2>Add Product</h2>
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="product_name">Product Name</label>
+            <input type="text" class="form-control" id="product_name" name="product_name" placeholder="Enter product name" required>
+          </div>
+          <div class="form-group">
+            <label for="slug">Slug</label>
+            <input type="text" class="form-control" id="slug" name="slug" placeholder="Enter slug" required>
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" class="form-control" id="price" name="price"  placeholder="Enter price" required min="0">
+          <div class="form-group">
+            <label for="image">Image</label>
+            <input type="file" class="form-control-file" id="image" name="image" required>
+          </div>
+          <div class="form-group">
+            <label for="stock">Stock</label>
+            <input type="number" class="form-control" id="stock" name="stock" placeholder="Enter stock" required min="1">
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="is_available" name="is_available">
+            <label class="form-check-label" for="is_available">Is Available</label>
+          </div>
+          <div class="form-group">
+            <label for="price">offer percentage</label>
+            <input type="number" class="form-control" id="offer_price" name="offer"  placeholder="Enter offer" required min="0">
+          <div class="form-group">
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select class="form-control" id="category" name="category" required>
+              {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.category_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="product_gallery">Product Gallery</label>
+            <input type="file" class="form-control-file" id="product_gallery" name="product_gallery" multiple required>
+          </div>
+          <div class="form-group" id="preview_images">
+            <!-- Preview images will be added dynamically -->
+          </div>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+  
+
+<script>
+  $(document).ready(function() {
+    // Function to preview selected images
+    function previewImages(input) {
+      var previewDiv = $('#preview_images');
+
+      if (input.files && input.files.length > 0) {
+        for (var i = 0; i < input.files.length; i++) {
+          var reader = new FileReader();
+          var file = input.files[i];
+
+          reader.onload = (function(file) {
+            return function(e) {
+              // Create a preview image with remove option
+              var previewImage = $('<div class="preview-image">')
+                .append('<img src="' + e.target.result + '" width="50px" height="50px">')
+                .append('<button type="button" class="btn btn-danger btn-sm remove-image">Remove</button>');
+
+              // Append the preview image to the preview div
+              previewDiv.append(previewImage);
+
+              // Event listener to remove the image when the remove button is clicked
+              previewImage.find('.remove-image').on('click', function() {
+                $(this).closest('.preview-image').remove();
+              });
+            };
+          })(file);
+
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+
+    // Event listener for the product gallery file input
+    $('#product_gallery').on('change', function() {
+      previewImages(this);
+    });
+  });
+</script>
+
+
+</html>

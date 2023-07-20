@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+{% include 'includes/alerts.html' %}
+<div class="container">
+	<div class="row">
+	{% include 'includes/dashboardsidebar.html' %}
+	<main class="col-md-9">
+		<article class="card">
+		<header class="card-header">
+			<strong class="d-inline-block mr-3">Your order history</strong>
+
+		</header>
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-12">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Product name</th>
+								<th scope="col">Product Variation</th>
+                                <th scope="col">Product quantity<th>
+                                <th scope="col">Product price</th>
+
+							
+							</tr>
+						</thead>
+						<tbody>
+							{% for order in order_products %}
+							<tr>
+								<td>{{order.product.product_name}}</td>
+                                <td>
+                                    {% for variation in order.variations.all %}
+              {{ variation.get_variation_display }}
+            
+              {% if not forloop.last %}, {% endif %}
+            {% empty %}
+              No variation
+            {% endfor %}
+                                </td>
+								<td>{{order.quantity}}</td>
+								<td>{{order.product.selling_price}}</td>
+
+						     <td>
+                                {% if order.show_return_button %}
+								
+                                {% if order.refund_status == 'Requested'%}
+								<form method="post" action="{% url 'initiate_refund' order.id  %}">
+									{% csrf_token %}
+			
+									
+									<button type="submit">Return</button>
+									
+								</form>
+								{% else %}
+								<p>{{ order.refund_status}}</p>
+                                {% endif %}
+                              {% endif %}
+                             </td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div> <!-- row.// -->
+		</div> <!-- card-body .// -->
+		</article> <!-- order-group.// -->
+		</main>
+		</div> <!-- row.// -->
+		</div>
+		</section>
+		
+		
+{% endblock %}

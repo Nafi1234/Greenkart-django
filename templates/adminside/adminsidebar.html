@@ -1,0 +1,40 @@
+<nav id="sidebar" class="">
+    <div class="custom-menu">
+        <button type="button" id="sidebarCollapse" class="btn btn-primary">
+  <i class="fa fa-bars"></i>
+  <span class="sr-only">Toggle Menu</span>
+</button>
+</div>
+    <div class="p-4 pt-3 vh-100 ">
+      <h1><a href="/admin" class="logo  " style="font-size: x-large;">Greatkart</a></h1>
+<ul class="list-unstyled components mb-5">
+    <li>
+        <a href="/admin">Dashboard</a>
+    </li>
+  <li class="active">
+    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Products</a>
+    <ul class="collapse list-unstyled" id="homeSubmenu">
+    <li>
+        <a href="{% url 'category' %}">Categories</a>
+    </li>
+    <li>
+        <a href="{% url 'adminproduct'%}">Product</a>
+    </li>
+    </ul>
+  </li>
+
+  <li>
+  <a href="{% url 'adminorder'%}" class="dropdown-toggle">Orders</a>
+
+  </li>
+  <li>
+  <a href="{% url 'user_mangement' %}">Users</a>
+  </li>
+</ul>
+
+
+
+
+
+</div>
+</nav>

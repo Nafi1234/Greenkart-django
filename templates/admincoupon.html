@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Green Kart Admin Panel</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body, nav {
+      margin-top: 0;
+      padding-top: 0;
+    }
+    .navbar {
+      background-color: #000;
+    }
+    .sidebar {
+      width: 250px;
+      height:750px;
+      background-color: #866ec7;
+      padding: 20px;
+      color: #fff;
+    }
+    .sidebar h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      margin-bottom: 10px;
+    }
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .table th,
+    .table td {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Green Kart</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="sidebar">
+          <h1>Green Kart</h1>
+          <ul>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li>
+              <a href="#productsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Products</a>
+              <ul class="collapse list-unstyled" id="productsSubmenu">
+                <li><a href="{% url 'add_category' %}">Categories</a></li>
+                <li><a href="{% url 'adminproduct' %}">Products</a></li>
+              </ul>
+            </li>
+            <li><a href="#">Orders</a></li>
+            <li><a href="{% url 'user_mangement' %}">Users</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="text-left mb-3">
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCouponModal">Add Coupon</button>
+        </div>
+        
+        <table class="table table-bordered" id="couponTable">
+          <thead>
+            <tr>
+              <th>Coupon Code</th>
+              <th>Discount Amount</th>
+              <th>Min Spent</th>
+              <th>Valid From</th>
+              <th>Valid To</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dynamically populate the table with data -->
+            {% for coupon in coupons %}
+            <tr>
+              <td>{{ coupon.coupon_code }}</td>
+              <td>{{ coupon.discount_amount }}</td>
+              <td>{{ coupon.min_spend }}</td>
+              <td>{{ coupon.valid_from }}</td>
+              <td>{{ coupon.valid_to }}</td>
+              <td>
+                <a class="btn btn-primary" href="{% url 'edit_coupon'  %}"><i class="material-icons">edit</i></a>
+              </td>
+              <td>
+                <form method="post" action="{% url 'delete_coupon' coupon.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="material-icons">delete</i></button>
+                  </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        
+        {% if coupons|length == 0 %}
+          <p>No coupons available</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Coupon Modal -->
+  <div class="modal fade" id="addCouponModal" tabindex="-1" role="dialog" aria-labelledby="addCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCouponModalLabel">Add Coupon</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" action="{% url 'add_coupon' %}">
+                {% csrf_token %}
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                  <ul>
+                    {% for field in form %}
+                    {% if field.errors %}
+                    <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                  <label for="couponCode">Coupon Code</label>
+                  <input type="text" class="form-control" id="couponCode" name="coupon_code" placeholder="Enter coupon code" required>
+                </div>
+                <div class="form-group">
+                  <label for="discountAmount">Discount Amount</label>
+                  <input type="number" class="form-control" id="discountAmount" name="discount_amount" placeholder="Enter discount amount" required>
+                </div>
+                <div class="form-group">
+                  <label for="minSpend">Min Spent</label>
+                  <input type="number" class="form-control" id="minSpend" name="min_spend" placeholder="Enter minimum spend" required>
+                </div>
+                <div class="form-group">
+                  <label for="validFrom">Valid From</label>
+                  <input type="date" class="form-control" id="validFrom" name="valid_from" required>
+                </div>
+                <div class="form-group">
+                  <label for="validTo">Valid To</label>
+                  <input type="date" class="form-control" id="validTo" name="valid_to" required>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+              </form>
+          
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>

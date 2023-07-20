@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    ul.thumb {
+      margin: 0 auto;
+      padding: 0;
+      float: left;
+    }
+  
+    ul.thumb li {
+      list-style: none;
+      margin: 10px;
+    }
+  
+    ul.thumb li img {
+      width: 80px;
+      height: 80px;
+      border: 1px solid grey;
+    }
+  </style>
+<section class="section-content padding-y bg">
+    <div class="container">
+    
+    <!-- ============================ COMPONENT 1 ================================= -->
+    <div class="card">
+        <div class="row no-gutters">
+            <aside class="col-md-6">
+                <article class="gallery-wrap">
+                    <div class="img-big-wrap mainImage">
+                        <center><img src="{{ single_product.images.url }}" data-zoomable="true"></center>
+                    </div> <!-- img-big-wrap.// -->
+
+                </article> <!-- gallery-wrap .end// -->
+                <ul class="thumb">
+                    <li>
+                        <a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" data-zoomable="true" alt="Product Image"></a>
+                        {% for i in product_gallery %}
+                        <a href="{{i.image.url}}" target="mainImage"><img src="{{i.image.url}}" data-zoomable="true" alt="Product Image"></a>
+                        {% endfor %}
+                    </li>
+                </ul>
+            </aside>
+            <main class="col-md-6 border-left">
+    <article class="content-body">
+    <form action="{% url 'add_cart' single_product.id  %}" method="POST">
+      {% csrf_token %}
+          <h2 class="title">{{ single_product.product_name }}</h2>
+          
+          <div class="mb-3">
+            {% if single_product.selling_price != single_product.price %}
+              <del class="price h4" style="color: red;">₹{{ single_product.price }}</del>
+              <var class="price h4">₹{{ single_product.selling_price }}</var>
+            {% else %}
+              <var class="price h4">₹{{ single_product.price }}</var>
+            {% endif %}
+          </div>
+        
+          
+          <p>Virgil Abloh’s Off-White is a streetwear-inspired collection that continues to break away from the conventions of mainstream fashion. Made in Italy, these black and brown Odsy-1000 low-top sneakers.</p>
+          
+          
+          <hr>
+              <div class="row">
+                  <div class="item-option-select">
+                      <h6>Choose Color</h6>
+                      <select name="color"class="form-control" required>
+                        <option value="" disabled selected>Select</option>
+										{% for i in single_product.variation_set.colors %}
+										<option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
+										{% endfor %}
+									  </select>
+
+              
+                  </div>
+              </div> <!-- row.// -->
+              <div class="row">
+                  <div class="item-option-select">
+                      <h6>Select Size</h6>
+                      <select name="size" class="form-control" required>
+                        <option value="" disabled selected>Select</option>
+										  {% for i in single_product.variation_set.sizes %}
+										  <option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
+										  {% endfor %}
+                      </select>
+                      
+                  </div>
+              </div> <!-- row.// -->
+              <hr>
+              {% if single_product.stock <= 0 or total_quantity > single_product.stock %}
+							<h5 class="text-danger">Out of Stock</h5>
+							{% else %}
+							<button type="submit" class="btn  btn-primary"> <span class="text">Add to Cart</span> <i class="fa fa-shopping-cart"></i> </button>
+							{% endif %}
+          </article> <!-- product-info-aside .// -->
+                  </main> <!-- col.// -->
+              </div> <!-- row.// -->
+          </div> <!-- card.// -->
+          <!-- ============================ COMPONENT 1 END .// ================================= -->
+          
+          <br>
+          
+          <div class="row">
+                      <div class="col-md-9">
+          
+              <header class="section-heading">
+                  <h3>Customer Reviews </h3>  
+        </form>
+        </header>
+    
+        <article class="box mb-3">
+            <div class="icontext w-100">
+                <img src="./images/avatars/avatar1.jpg" class="img-xs icon rounded-circle">
+                <div class="text">
+                    <span class="date text-muted float-md-right">24.04.2020 </span>  
+                    <h6 class="mb-1">Mike John </h6>
+                    
+                </div>
+            </div> <!-- icontext.// -->
+            <div class="mt-3">
+                <p>
+                    Dummy comment Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                    quis nostrud exercitation ullamco laboris nisi ut aliquip
+                </p>	
+            </div>
+        </article>
+    
+        
+    
+        </div> <!-- col.// -->
+    </div> <!-- row.// -->
+    
+    
+    </div> <!-- container .//  -->
+    </section>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+<aside class="col-md-3">
+    <!--   SIDEBAR   -->
+    <ul class="list-group">
+        <a class="list-group-item {% if request.path == '/accounts/kdashboard/' %}active{% endif %}" href="{% url 'userdashboard' %}"> Dashboard</a>
+        <a class="list-group-item {% if request.path == '/accounts/myorders/' %}active{% endif %}" href="{% url 'my_orders' %}"> My orders </a>
+        <a class="list-group-item {% if request.path == '/accounts/editprofile/' %}active{% endif %}" href="{% url 'editprofile' %}"> edit profile </a>
+        <a class="list-group-item {% if request.path == '/accounts/change_password/' %}active{% endif %}"href="{% url 'change_password'%}">change password </a>
+        <a class="list-group-item {% if request.path == '/accounts/refferal/' %}active{% endif %}" href="{% url 'refferal' %}">Refferral Code </a>
+        <a class="list-group-item {% if request.path == '/accounts/wallet/' %}active{% endif %}" href="{% url 'wallet' %}">Wallet</a>
+    </ul>
+    <br>
+    <a class="btn btn-light btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 
+    <!--   SIDEBAR .//END   -->
+</aside>

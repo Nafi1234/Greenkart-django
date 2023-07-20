@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'includes/alerts.html' %}
+<div class="container mt-5">
+    <div class="row">
+        {% include 'includes/dashboardsidebar.html' %}
+        <main class="col-md-9">
+            <article class="card">
+            <header class="card-header">
+                <strong class="d-inline-block mr-3">Wallet Amount</strong>
+            </header>
+            <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Current Balance</h5>
+                  <h2 class="card-text" id="wallet-amount">₹{{ balance }}</h2>
+                </div>
+    </div>
+    </article>
+        </main>
+</div>
+{% endblock %}

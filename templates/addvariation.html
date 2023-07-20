@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Green Kart Admin Panel</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+  <style>
+    /* Add your custom styles here */
+    body, nav {
+      margin-top: 0;
+      padding-top: 0;
+    }
+    .navbar {
+      background-color: #000;
+    }
+    .sidebar {
+      width: 250px;
+      height: 750px;
+      background-color: #866ec7;
+      padding: 20px;
+      color: #fff;
+    }
+    .sidebar h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      margin-bottom: 10px;
+    }
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .table th,
+    .table td {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Green Kart</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="sidebar">
+          <h1>Green Kart</h1>
+          <ul>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li>
+              <a href="#productsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Products</a>
+              <ul class="collapse list-unstyled" id="productsSubmenu">
+                <li><a href="#">Categories</a></li>
+                <li><a href="#">Products</a></li>
+              </ul>
+            </li>
+            <li><a href="#">Orders</a></li>
+            <li><a href="#">Users</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <h2>Add Variation</h2>
+        <form method="post" action="{% url 'add_variation' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="product">Product</label>
+            <select class="form-control" id="product" name="product" required>
+              {% for product in products %}
+                <option value="{{ product.id }}">{{ product.product_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="variationCategory">Variation Category</label>
+            <select class="form-control" id="variationCategory" name="variationCategory" required>
+              {% for category in variation_categories %}
+                <option value="{{ category.0 }}">{{ category.1 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="variationValue">Variation Value</label>
+            <input type="text" class="form-control" id="variationValue" name="variationValue" placeholder="Enter variation value" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Variation</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+	<div class="row">
+	{% include 'includes/dashboardsidebar.html' %}
+	<main class="col-md-9">
+		<article class="card">
+		<header class="card-header">
+			<strong class="d-inline-block mr-3">Your Refferel Code</strong>
+
+		</header>
+		<div class="card-body">
+			<div class="row">
+                <div class="card-body">
+					<div class="form-group">
+						<label for="referral_code">Referral Code</label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="referral_code" value="{{ referral_code }}" readonly>
+							<div class="input-group-append">
+								<button class="btn btn-secondary" type="button" onclick="copyReferralCode()">Copy</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+
+			</div> <!-- row.// -->
+		</div> <!-- card-body .// -->
+
+		</article> <!-- order-group.// -->
+	</main>
+</div> <!-- row.// -->
+<script>
+	function copyReferralCode() {
+		console.log('vadf')
+		var referralCodeInput = document.getElementById('referral_code');
+		referralCodeInput.select();
+		document.execCommand('copy');
+	
+	}
+</script>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+

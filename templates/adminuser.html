@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Green Kart Admin Panel</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <style>
+    body, nav {
+      margin-top: 0;
+      padding-top: 0;
+    }
+    .navbar {
+      background-color: #000;
+    }
+    .sidebar {
+      width: 250px;
+      height: 750px;
+      background-color: #866ec7;
+      padding: 20px;
+      color: #fff;
+    }
+    .sidebar h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      margin-bottom: 10px;
+    }
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .table th,
+    .table td {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Green Kart</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="sidebar">
+          <h1>Green Kart</h1>
+          <ul>
+            <li><a href="{% url 'dashboard'%}">Dashboard</a></li>
+            <li>
+              <a href="#" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Products</a>
+              <ul class="collapse list-unstyled" id="productsSubmenu">
+                <li><a href="{% url 'add_category' %}">Categories</a></li>
+                <li><a href="{% url 'adminproduct' %}">Products</a></li>
+              </ul>
+            </li>
+            <li><a href="#">Orders</a></li>
+            <li><a href="{% url 'user_mangement' %}">Users</a></li>
+            <li><a href= "{% url 'list_variations' %}"></li>Variations<a><li>
+              <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
+              <li><a href="{% url 'adminwallet' %}">Wallet</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <h2>User Management</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Phone Number</th>
+              <th>Active</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+           {% for account in accounts %}
+              <tr>
+                <td>{{ account.username }}</td>
+                <td>{{ account.email }}</td>
+                <td>{{ account.phone_number }}</td>
+                <td>
+                    <input type="checkbox" class="form-check-input" {% if not account.is_active %} checked disabled {% endif %}>
+
+                </td>
+                <td>
+                  <!-- Actions for each user -->
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+</body>
+</html>

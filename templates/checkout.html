@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <!-- ============================ COMPONENT 1 ================================= -->
+        <div class="row">
+            <aside class="col-lg-6">
+                <div class="card">
+                    <form action="{% url 'place_order' %}" method="POST">
+                        {% csrf_token %}
+                
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Billing Address</h4>
+                        {% if userprofile %}
+                        <div class="card">
+                            <div class="card-header">Saved Address</div>
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="address" id="user-profile" value="user-profile">
+                                    <label class="form-check-label" for="user-profile">
+                                        <div class="address-details">
+                                            <p class="mb-1">{{ user.first_name }}</p>
+                                            <p class="mb-1">{{ userprofile.address_line1 }}</p>
+                                            <p class="mb-1">{{ userprofile.address_line2 }}</p>
+                                            <p class="mb-1">{{ userprofile.country }}</p>
+                                            <p class="mb-1">{{ userprofile.state }}</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                    {% endif %}
+                    
+                    {% if addresses_with_fields %}
+                        <div class="card-body">
+                            {% for address_dict in addresses_with_fields %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="address" id="address{{ forloop.counter }}" value="{{ address_dict.address.id }}">
+                                    <label class="form-check-label" for="address{{ forloop.counter }}">
+                                        {% for field in address_dict.fields %}
+                                            {{ field.1 }}<br>
+                                        {% endfor %}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>No saved addresses found.</p>
+                    {% endif %}
+                    <hr>
+                    
+                       <h5 class="card-title mb-4">Add New Address</h5>
+                       <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#addAddressModal">Add Address</button>
+                    </div>
+                </div> <!-- card.// -->
+         <!-- card.// -->
+            </aside>
+            <aside class="col-lg-6">
+                <!-- Coupon card -->
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Coupon</h4>
+
+                        <div class="form-group">
+                            <label for="coupon_code">Coupon Code</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="coupon_code" name="coupon_code" placeholder="Enter coupon code">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="apply_coupon_btn">Apply</button>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="grand_total" value="{{ grand_total }}">
+                        <div id="coupon_container">
+                            {% if coupon %}
+                            <div id="coupon_container" class="alert alert-success mt-3">
+                                Coupon "{{ coupon.code }}" applied successfully. Discount: $ {{ coupon.discount }}
+                                <a href="#" class="float-right text-danger" id="remove_coupon_btn">Remove</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div id="invalid_coupon_container">
+                            {% if invalid_coupon %}
+                            <div class="alert alert-danger mt-3">
+                                Coupon "{{ invalid_coupon }}" is not valid.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div> <!-- coupon card.// -->
+
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Order Summary</h4>
+                        <dl class="dlist-align">
+                            <dt>Total price:</dt>
+                            <dd id="total_price" class="text-right">₹{{ total }}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Tax:</dt>
+                            <dd id="tax" class="text-right"> ₹ {{ tax }}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Grand Total:</dt>
+                            <dd id="grand_total_value" class="text-right text-dark b"><strong>₹ {{ grand_total }}</strong></dd>
+                        </dl>
+                        <hr>
+                       
+                    </p>
+                    
+                        <!-- Your form fields here -->
+                        <button type="submit" class="btn btn-primary btn-block">Place Order</button>
+                    </form>
+                    
+                    <a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
+                    </div>
+                </div>
+                
+            </aside> <!-- col.// -->
+        </div> <!-- row.// -->
+    </div> <!-- container .//  -->
+</section>
+<!-- Add Address Modal -->
+<div class="modal fade" id="addAddressModal" tabindex="-1" role="dialog" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'add_address' %}" method="POST">
+                    {% csrf_token %}
+                    <!-- Address form fields here -->
+                    <input type="hidden" name="user" value="{{ request.user.id }}">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address_line_1">Address Line 1</label>
+                        <input type="text" class="form-control" id="address_line_1" name="address_line1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address_line_2">Address Line 2</label>
+                        <input type="text" class="form-control" id="address_line_2" name="address_line2">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input type="text" class="form-control" id="country" name="country" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" class="form-control" id="state" name="state" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" class="form-control" id="city" name="city" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Apply Coupon
+        var applyCouponBtn = document.getElementById('apply_coupon_btn');
+        if (applyCouponBtn) {
+            applyCouponBtn.addEventListener('click', function() {
+                var couponCode = document.getElementById('coupon_code').value;
+                var grandTotal = document.getElementById('grand_total').value;
+
+                // Get CSRF token from the cookie
+                var csrfToken = getCookie('csrftoken');
+
+                // Make the AJAX request to apply_coupon endpoint
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '{% url "apply_coupon" %}');
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            // Coupon applied successfully
+                            var couponContainer = document.getElementById('coupon_container');
+                            couponContainer.innerHTML = '<div class="alert alert-success mt-3">' +
+                                'Coupon "' + response.coupon.code + '" applied successfully. Discount: $' + response.coupon.discount +
+                                '<a href="#" class="float-right text-danger" id="remove_coupon_btn">Remove</a></div>';
+
+                            // Update order summary
+                            var totalElement = document.getElementById('total_price');
+                            var taxElement = document.getElementById('tax');
+                            var grandTotalElement = document.getElementById('grand_total_value');
+
+                            var total = parseFloat(totalElement.textContent.replace('$', ''));
+                            var discount = parseFloat(response.coupon.discount);
+                            var newGrandTotal = total - discount;
+                            var tax = parseFloat(taxElement.textContent.replace('$', ''));
+
+                            var newGrandTotal = total - discount + tax;
+
+                            grandTotalElement.textContent = '$ ' + newGrandTotal.toFixed(2);
+
+                            // Optionally, you can update the tax amount as well
+                            var tax = (2 * newGrandTotal) / 100;
+                            taxElement.textContent = '$ ' + tax.toFixed(2);
+
+                            // Add event listener to remove coupon button
+                            var removeCouponBtn = document.getElementById('remove_coupon_btn');
+                            if (removeCouponBtn) {
+                                removeCouponBtn.addEventListener('click', function() {
+                                    // Get CSRF token from the cookie
+                                    var csrfToken = getCookie('csrftoken');
+
+                                    // Make the AJAX request to remove_coupon endpoint
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('POST', '{% url "remove_coupon" %}');
+                                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                                    xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                                    xhr.onload = function() {
+                                        if (xhr.status === 200) {
+                                            var response = JSON.parse(xhr.responseText);
+                                            if (response.success) {
+                                                // Coupon removed successfully
+                                                var couponContainer = document.getElementById('coupon_container');
+                                                couponContainer.innerHTML = '';
+
+                                                // Restore the old grand total
+                                                grandTotalElement.textContent = '$ ' + response.grand_total;
+
+                                                // Optionally, you can restore the tax amount as well
+                                                taxElement.textContent = '$ ' + tax.toFixed(2);
+                                            } else {
+                                                // Error in removing coupon
+                                                console.error('Error in removing coupon.');
+                                            }
+                                        }
+                                    };
+                                    xhr.send();
+                                });
+                            }
+                        } else {
+                            // Invalid coupon
+                            var invalidCouponContainer = document.getElementById('invalid_coupon_container');
+                            invalidCouponContainer.innerHTML = '<div class="alert alert-danger mt-3">' +
+                                'Coupon "' + response.invalid_coupon + '" is not valid.</div>';
+                        }
+                    }
+                };
+                xhr.send('coupon_code=' + encodeURIComponent(couponCode) + '&grand_total=' + encodeURIComponent(grandTotal));
+            });
+        }
+    });
+
+    // Function to retrieve the CSRF token from the cookie
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+
+{% endblock %}
