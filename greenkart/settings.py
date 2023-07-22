@@ -15,6 +15,7 @@ import os
 
 
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -45,7 +46,8 @@ INSTALLED_APPS = [
     'storeapp',
     'cart',
     'orders',
-    'custom_filters'
+    'custom_filters',
+
 ]
 
 MIDDLEWARE = [
@@ -121,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'UTC+05:30'
 
 USE_I18N = True
 
@@ -131,13 +133,14 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
+#https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT =  os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'greenkart', 'static'),
 ]
+
 from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
@@ -157,3 +160,16 @@ EMAIL_USE_TLS = True
 
 razor_pay_key_id ='rzp_test_t5IrTK0P33DxOZ'
 key_secret ='kQTb4MI8P1hhbj1B4pRbwFX7'
+''''''''''
+#aws creditionals
+AWS_ACCESS_KEY_ID="AKIAYTZZ3K3M3U3OEZN6"
+AWS_SECRET_ACCESS_KEY="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"
+
+#s3 configurations
+AWS_STORAGE_BUCKET_NAME="greenkart-1"
+DEFAULT_FILE_STORAGE='storages.backends.s3boto3.S3Boto3Storage'
+STATIC_FILE_STORAGE='storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_S3_CUSTOM_DOMAIN='%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_FILE_OVERWRITE= False
+'''''''''
