@@ -355,7 +355,8 @@ def refferal(request):
 @login_required(login_url = 'login')
 def wallet(request):
     user=request.user
-    wallet=Wallet.objects.get(user=user)
+    wallet, created = Wallet.objects.get_or_create(user=user, defaults={'balance': 0})
+
     print(wallet)
     balance=wallet.balance
     context={
