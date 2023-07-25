@@ -41,6 +41,7 @@ def productdetails(request,category_slug,product_slug):
     
     print(request.session)
     total_quantity = 0
+    
     #try:
       #  cart = Cart.objects.get(cart_id=_cart_id(request))
     #except Cart.DoesNotExist:

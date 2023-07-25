@@ -9,6 +9,12 @@ from django.db.models import Sum
 from accounts.models  import UserProfile
 from orders.models import Addaddress
 from .forms import AddressForm
+from django.utils import timezone
+from adminn.models import Coupon
+from django.http import JsonResponse
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
 def _cart_id(request):
     cart = request.session.session_key
     if not cart:
@@ -80,6 +86,9 @@ def add_cart(request, product_id):
                         item.variations.add(*product_variation)
                     item.save()
             else:
+                return HttpResponseRedirect(reverse('cart') + '?message=out_of_stock')
+            
+
                 redirect('cart')
         else:
             cart_item = CartItem.objects.create(
@@ -89,7 +98,7 @@ def add_cart(request, product_id):
             )
             if len(product_variation) > 0:
                 cart_item.variations.clear()
-                cart_item.variations.add(*product_variation)
+                cart_item.variations.add(*product_variation) 
             cart_item.save()
         return redirect('cart')
     # If the user is not authenticated
@@ -154,6 +163,8 @@ def add_cart(request, product_id):
                         item.variations.add(*product_variation)
                     item.save()
             else:
+                #messages.error(request, 'Out of stock.')
+                return HttpResponseRedirect(reverse('cart') + '?message=out_of_stock')
                 return redirect('cart')        
         else:
             print("cart", cart, "product", product)
@@ -279,6 +290,7 @@ def add_address(request):
         if form.is_valid():
             ("haiiiiiiiiiiiiiiiiiiiiiiiiii")
             print('haisdsdsdd')
+            form.save()
             # Optionally, you can associate the address with the current user
             # For example, if you have a ForeignKey field 'user' in the Address model
            #address = form.save(commit=False)
@@ -291,3 +303,18 @@ def add_address(request):
     else:
         form = AddressForm()
     return render(request, 'checkout.html', {'form': form})
+
+def get_valid_coupons(request):
+    print('get_valid_coupons view is called')  # Debugging statement
+    try:
+        # Get the list of valid coupons from the database
+        valid_coupons = Coupon.objects.filter(valid_from__lte=timezone.now(), valid_to__gte=timezone.now())
+
+        # Create a list of dictionaries containing coupon code and discount amount
+        coupons_list = [{"code": coupon.coupon_code, "discount": coupon.discount_amount} for coupon in valid_coupons]
+
+        # Return the list of valid coupons as a JSON response
+        return JsonResponse(coupons_list, safe=False)
+    except Exception as e:
+        print(f'Error: {e}')  # Print the specific exception message for debugging purposes
+        return JsonResponse({'error': 'Internal Server Error'}, status=500)

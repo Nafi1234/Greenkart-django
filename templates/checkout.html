@@ -18,7 +18,7 @@
                             <div class="card-header">Saved Address</div>
                             <div class="card-body">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="address" id="user-profile" value="user-profile">
+                                    <input class="form-check-input" type="radio" name="address" id="user-profile" value="user-profile"  >
                                     <label class="form-check-label" for="user-profile">
                                         <div class="address-details">
                                             <p class="mb-1">{{ user.first_name }}</p>
@@ -38,7 +38,7 @@
                         <div class="card-body">
                             {% for address_dict in addresses_with_fields %}
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="address" id="address{{ forloop.counter }}" value="{{ address_dict.address.id }}">
+                                    <input class="form-check-input" type="radio" name="address" id="address{{ forloop.counter }}" value="{{ address_dict.address.id }}"  required>
                                     <label class="form-check-label" for="address{{ forloop.counter }}">
                                         {% for field in address_dict.fields %}
                                             {{ field.1 }}<br>
@@ -71,7 +71,13 @@
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button" id="apply_coupon_btn">Apply</button>
                                 </div>
+                                
+
                             </div>
+                            <div class="modal-footer d-flex justify-content-start">
+                                <button type="button" class="btn btn-link d-block" id="view_available_coupons_btn" data-toggle="modal" data-target="#couponModal">View Available Coupons</button>
+                            </div>
+
                         </div>
                         <input type="hidden" id="grand_total" value="{{ grand_total }}">
                         <div id="coupon_container">
@@ -89,6 +95,7 @@
                             </div>
                             {% endif %}
                         </div>
+                    
                     </div>
                 </div> <!-- coupon card.// -->
 
@@ -105,7 +112,8 @@
                         </dl>
                         <dl class="dlist-align">
                             <dt>Grand Total:</dt>
-                            <dd id="grand_total_value" class="text-right text-dark b"><strong>₹ {{ grand_total }}</strong></dd>
+                            <dd id="grand_total_value" class="text-right text-dark b"><strong>₹{{ grand_total }}</strong></dd>
+                        </dl>
                         </dl>
                         <hr>
                        
@@ -180,15 +188,105 @@
         </div>
     </div>
 </div>
+<!-- Your existing content here -->
 
+<!-- Available Coupons Modal -->
+<div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-labelledby="couponModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="couponModalLabel">Available Coupons</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="couponList">
+                    <!-- The list of available coupons will be populated here dynamically -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Your existing content here -->
+
+
+<!-- Add these lines to your <head> section -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var grandTotalElement = document.getElementById('grand_total_value');
+        var grandTotal = parseFloat(grandTotalElement.textContent.replace('₹', ''));
+
+        // Function to update the grand total based on the coupon details
+        function updateGrandTotal(coupon) {
+            var couponContainer = document.getElementById('coupon_container');
+            var totalElement = document.getElementById('total_price');
+            var taxElement = document.getElementById('tax');
+
+            var total = parseFloat(totalElement.textContent.replace('₹', ''));
+            var tax = parseFloat(taxElement.textContent.replace('₹', ''));
+
+            // Calculate the new grand total and tax amount
+            var discount = parseFloat(coupon.discount);
+            var newGrandTotal = total - discount;
+            var taxAmount = (2 * newGrandTotal) / 100;
+            newGrandTotal = newGrandTotal + taxAmount;
+
+            // Update the frontend elements with the new values
+            couponContainer.innerHTML = '<div class="alert alert-success mt-3">' +
+                'Coupon "' + coupon.code + '" applied successfully. Discount: ₹' + discount.toFixed(2) +
+                '<a href="#" class="float-right text-danger" id="remove_coupon_btn">Remove</a></div>';
+
+            grandTotalElement.textContent = '₹' + newGrandTotal.toFixed(2);
+            taxElement.textContent = '₹' + taxAmount.toFixed(2);
+
+            // Update the grandTotal variable
+            grandTotal = newGrandTotal;
+
+            // Add event listener to remove coupon button
+            var removeCouponBtn = document.getElementById('remove_coupon_btn');
+            if (removeCouponBtn) {
+                removeCouponBtn.addEventListener('click', function() {
+                    // Get CSRF token from the cookie
+                    var csrfToken = getCookie('csrftoken');
+
+                    // Make the AJAX request to remove_coupon endpoint
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{% url "remove_coupon" %}');
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                // Coupon removed successfully
+                                couponContainer.innerHTML = '';
+
+                                // Restore the old grand total
+                                grandTotalElement.textContent = '₹' + response.grand_total;
+
+                                // Optionally, you can restore the tax amount as well
+                                taxElement.textContent = '₹' + tax.toFixed(2);
+
+                                // Update the grandTotal variable
+                                grandTotal = parseFloat(response.grand_total);
+                            } else {
+                                // Error in removing coupon
+                                console.error('Error in removing coupon.');
+                            }
+                        }
+                    };
+                    xhr.send();
+                });
+            }
+        }
+
         // Apply Coupon
         var applyCouponBtn = document.getElementById('apply_coupon_btn');
         if (applyCouponBtn) {
             applyCouponBtn.addEventListener('click', function() {
                 var couponCode = document.getElementById('coupon_code').value;
-                var grandTotal = document.getElementById('grand_total').value;
 
                 // Get CSRF token from the cookie
                 var csrfToken = getCookie('csrftoken');
@@ -203,63 +301,7 @@
                         var response = JSON.parse(xhr.responseText);
                         if (response.success) {
                             // Coupon applied successfully
-                            var couponContainer = document.getElementById('coupon_container');
-                            couponContainer.innerHTML = '<div class="alert alert-success mt-3">' +
-                                'Coupon "' + response.coupon.code + '" applied successfully. Discount: $' + response.coupon.discount +
-                                '<a href="#" class="float-right text-danger" id="remove_coupon_btn">Remove</a></div>';
-
-                            // Update order summary
-                            var totalElement = document.getElementById('total_price');
-                            var taxElement = document.getElementById('tax');
-                            var grandTotalElement = document.getElementById('grand_total_value');
-
-                            var total = parseFloat(totalElement.textContent.replace('$', ''));
-                            var discount = parseFloat(response.coupon.discount);
-                            var newGrandTotal = total - discount;
-                            var tax = parseFloat(taxElement.textContent.replace('$', ''));
-
-                            var newGrandTotal = total - discount + tax;
-
-                            grandTotalElement.textContent = '$ ' + newGrandTotal.toFixed(2);
-
-                            // Optionally, you can update the tax amount as well
-                            var tax = (2 * newGrandTotal) / 100;
-                            taxElement.textContent = '$ ' + tax.toFixed(2);
-
-                            // Add event listener to remove coupon button
-                            var removeCouponBtn = document.getElementById('remove_coupon_btn');
-                            if (removeCouponBtn) {
-                                removeCouponBtn.addEventListener('click', function() {
-                                    // Get CSRF token from the cookie
-                                    var csrfToken = getCookie('csrftoken');
-
-                                    // Make the AJAX request to remove_coupon endpoint
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '{% url "remove_coupon" %}');
-                                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                                    xhr.setRequestHeader('X-CSRFToken', csrfToken);
-                                    xhr.onload = function() {
-                                        if (xhr.status === 200) {
-                                            var response = JSON.parse(xhr.responseText);
-                                            if (response.success) {
-                                                // Coupon removed successfully
-                                                var couponContainer = document.getElementById('coupon_container');
-                                                couponContainer.innerHTML = '';
-
-                                                // Restore the old grand total
-                                                grandTotalElement.textContent = '$ ' + response.grand_total;
-
-                                                // Optionally, you can restore the tax amount as well
-                                                taxElement.textContent = '$ ' + tax.toFixed(2);
-                                            } else {
-                                                // Error in removing coupon
-                                                console.error('Error in removing coupon.');
-                                            }
-                                        }
-                                    };
-                                    xhr.send();
-                                });
-                            }
+                            updateGrandTotal(response.coupon);
                         } else {
                             // Invalid coupon
                             var invalidCouponContainer = document.getElementById('invalid_coupon_container');
@@ -272,6 +314,41 @@
             });
         }
     });
+ 
+ document.addEventListener('DOMContentLoaded', function() {
+    // Your existing JavaScript code here...
+
+    // Fetch and display available coupons in the modal
+    var viewAvailableCouponsBtn = document.getElementById('view_available_coupons_btn');
+    if (viewAvailableCouponsBtn) {
+        viewAvailableCouponsBtn.addEventListener('click', function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '{% url "get_valid_coupons" %}');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var coupons = JSON.parse(xhr.responseText);
+                    var couponList = document.getElementById('couponList');
+                    couponList.innerHTML = ''; // Clear the existing content
+                    for (var i = 0; i < coupons.length; i++) {
+                        var coupon = coupons[i];
+                        var listItem = document.createElement('li');
+                        listItem.classList.add('list-group-item');
+                        listItem.textContent = coupon.code;
+                        listItem.addEventListener('click', function() {
+                            document.getElementById('coupon_code').value = this.textContent;
+                            $('#couponModal').modal('hide'); // Hide the modal when a coupon is selected
+                        });
+                        couponList.appendChild(listItem);
+                    }
+                }
+            };
+            xhr.send();
+        });
+    }
+
+    // Your existing JavaScript code here...
+});
+
 
     // Function to retrieve the CSRF token from the cookie
     function getCookie(name) {

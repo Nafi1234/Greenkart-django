@@ -32,16 +32,16 @@ def adminlogin(request):
         email = request.POST['email']
         password = request.POST['password']
         user = auth.authenticate(request, email=email, password=password)
-        if user is not None:
+        if user is not None and user.is_active and user.is_superadmin:
             auth.login(request, user)
-            messages.success(request, 'You are now logged in.')
-            return redirect('dashboard')
+            messages.success(request, 'You are now logged in as a super admin.')
+            return redirect('dashboard')  # Replace 'dashboard' with the URL of your admin dashboard view
         else:
-            messages.error(request, 'Invalid login credentials')
-            return redirect('adminlogin')
+            messages.error(request, 'Invalid login credentials or you are not a super admin.')
+            return redirect('adminlogin')  # Redirect back to the admin login page
 
-    if request.user.is_authenticated:
-        return redirect('dashboard')
+    if request.user.is_authenticated and request.user.is_superadmin:
+        return redirect('dashboard')  # Redirect to the admin dashboard view if the user is already logged in and is a super admin
 
     return render(request, 'adminlogin.html')
 
@@ -180,7 +180,7 @@ def user_management(request):
     }
     return render(request, 'adminuser.html', context)
 def adminorder(request):
-    if request.method == 'POST' and request.is_ajax():
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         order_number = request.POST.get('order_number')
         new_status = request.POST.get('new_status')
 
@@ -188,6 +188,7 @@ def adminorder(request):
             order = Order.objects.get(order_number=order_number)
             order.status = new_status
             order.save()
+            print('newwww',order.status)
             return JsonResponse({'success': True})
         except Order.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Order not found'})
@@ -234,8 +235,8 @@ def dashboard(request):
         # Retrieve the custom start and end dates from the request parameters
         start_date_param = request.GET.get('start_date')
         end_date_param = request.GET.get('end_date')
-        print(start_date_param)
-        print(end_date_param)
+        print('printing start_date_param',start_date_param)
+        print('printing',end_date_param)
         # Parse the custom start and end dates if they are provided
         if start_date_param and end_date_param:
 
@@ -250,7 +251,7 @@ def dashboard(request):
                 print('ValueError:', str(e))
         # Handle invalid date formats here if needed
                 pass
-    print(end_date)
+    print('here i am printing',end_date)
     # Filter the order products based on the selected date range
     filtered_order_products = order_products.filter(created_at__range=(start_date, end_date))
     top_selling_products = []
@@ -412,6 +413,6 @@ def update_refund_status(request, order_id):
         user_wallet.balance +=  Decimal(str(order_product.product_price * order_product.quantity))
         user_wallet.save()
 
-        return redirect('order_detail',order_product.order_id)  # Redirect to a success page or appropriate URL
+        return redirect('adminorder')  # Redirect to a success page or appropriate URL
 
     return redirect('my_orders')

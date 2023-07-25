@@ -86,11 +86,11 @@
         {% for product_data in order_products %}
         <tr>
           <td>{{ product_data.product }}</td>
-          <td>{{ product_data.refund_status}}</td>
+          
           <td>
             {% for variation in product_data.variations.all %}
 {{ variation.get_variation_display }}
-
+  
 {% if not forloop.last %}, {% endif %}
 {% empty %}
 No variation

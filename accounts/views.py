@@ -396,7 +396,8 @@ def inovicesucessfull(request,order_number):
     order = Order.objects.get(order_number=order_number, is_ordered=True)
     ordered_products = OrderProduct.objects.filter(order_id=order.id)
     context={
-     'ordered_products':ordered_products}
+     'ordered_products':ordered_products,
+     'order':order}
          
     return render(request,'orders/successful.html',context)
 @login_required(login_url = 'login')

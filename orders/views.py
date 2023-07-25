@@ -168,6 +168,7 @@ def apply_coupon(request):
             if coupon.min_spend <= grand_total:
                 discount_amount = coupon.discount_amount
                 grand_total -= discount_amount
+                print(grand_total)
                 request.session['coupon'] = {
                     'code': coupon.coupon_code,
                     'discount': float(discount_amount),
