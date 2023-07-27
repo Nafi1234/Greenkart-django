@@ -38,6 +38,11 @@ class Registration(forms.ModelForm):
                 raise forms.ValidationError('Invalid referral code.')
 
         return referral_code
+    def clean_phone_number(self):
+        phonenumber=self.cleaned_data['phone_number']
+        if len(phonenumber) !=10:
+            raise forms.ValidationError("enter phone number which is 10 digit")
+        return phonenumber
     def clean(self):
         cleaned_data=super(Registration,self).clean()
         password=cleaned_data.get('password')
@@ -61,6 +66,11 @@ class UserForm(forms.ModelForm):
         super(UserForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+    def clean_phone_number(self):
+        phonenumber=self.cleaned_data['phone_number']
+        if len(phonenumber) !=10:
+            raise forms.ValidationError("enter phone number which is 10 digit")
+        return phonenumber
 
 class UserProfileForm(forms.ModelForm):
     class Meta:

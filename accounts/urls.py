@@ -19,7 +19,8 @@ urlpatterns = [
     path('wallet/',views.wallet,name='wallet'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('inovicesucessfull/<int:order_number>/',views.inovicesucessfull,name='invoicesucessfull'),
-    path('initiate_refund/<int:order_id>/',views.initiate_refund,name='initiate_refund')
+    path('initiate_refund/<int:order_id>/',views.initiate_refund,name='initiate_refund'),
+
 
    
 

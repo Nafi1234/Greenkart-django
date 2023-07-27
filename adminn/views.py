@@ -20,7 +20,9 @@ from django.utils import timezone
 import pdfkit
 from django.db.models import F, ExpressionWrapper, FloatField
 from decimal import Decimal
+from django.contrib.auth import logout
 
+from django.db.models import Count
 
 
 
@@ -35,20 +37,25 @@ def adminlogin(request):
         if user is not None and user.is_active and user.is_superadmin:
             auth.login(request, user)
             messages.success(request, 'You are now logged in as a super admin.')
-            return redirect('dashboard')  # Replace 'dashboard' with the URL of your admin dashboard view
+            return redirect('adminchart')  # Replace 'dashboard' with the URL of your admin dashboard view
         else:
             messages.error(request, 'Invalid login credentials or you are not a super admin.')
             return redirect('adminlogin')  # Redirect back to the admin login page
 
     if request.user.is_authenticated and request.user.is_superadmin:
-        return redirect('dashboard')  # Redirect to the admin dashboard view if the user is already logged in and is a super admin
+        return redirect('adminchart')  # Redirect to the admin dashboard view if the user is already logged in and is a super admin
 
     return render(request, 'adminlogin.html')
-
+def adminlogout(request):
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('adminlogin')
 
 @login_required(login_url='adminlogin') 
 def category(request):
+    print('haiiiiiiiiiiiiiii')
     categories= Category.objects.all()
+    print('here printing categories',categories)
     context={'categories':categories}
     return render(request,'category.html',context)
 @login_required(login_url='adminlogin') 
@@ -416,3 +423,39 @@ def update_refund_status(request, order_id):
         return redirect('adminorder')  # Redirect to a success page or appropriate URL
 
     return redirect('my_orders')
+@login_required(login_url='adminlogin') 
+def adminchart(request):
+    current_date = datetime.now().date()
+    five_days_ago = current_date - timedelta(days=5)
+
+# Step 2: Query the Order model to retrieve orders placed within the last 5 days
+    last_five_days_orders = Order.objects.filter(created_at__gte=five_days_ago)
+
+# Step 3: Group the orders by day and calculate the total sum of order_total per day
+    orders_by_day = last_five_days_orders.values('created_at__date').annotate(total_sum=Sum('order_total'))
+
+# Step 4: Create an array to store the total sums for each day
+    total_sums_array = [0] * 5  # Initialize the array with zeros for all 5 days
+
+# Step 5: Fill the array with the total sums for each day
+    for data in orders_by_day:
+        date = data['created_at__date']
+        total_sum = data['total_sum']
+        days_ago = (current_date - date).days
+        total_sums_array[5 - days_ago - 1] = total_sum
+    print(total_sums_array)
+    
+    total_users_count = Account.objects.count()
+    print(total_users_count)
+    totalproducts=Product.objects.count()
+    totalorders=Product.objects.count()
+# Step 6: Print or use the total_sums_array as needed
+    context = {
+        'total_sums_array': total_sums_array,
+        'total_users_count':total_users_count,
+        'totalproducts':totalproducts,
+        'totalorders':totalorders
+    }
+    
+    
+    return render(request,'adminchart.html',context)

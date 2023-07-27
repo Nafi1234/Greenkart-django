@@ -23,7 +23,9 @@ urlpatterns = [
     path('add-variation/', views.add_variation, name='add_variation'),
     path('adminwallet/',views.adminwallet,name='adminwallet'),
     path('order-detail/<int:order_number>',views.order_detail,name='order-details'),
-    path('update_refund_status/<int:order_id>',views.update_refund_status,name='update_refund_status')
+    path('update_refund_status/<int:order_id>',views.update_refund_status,name='update_refund_status'),
+    path('adminchart/',views.adminchart,name='adminchart'),
+    path('adminlogout/', views.adminlogout, name='adminlogout'),
 
 ]
      

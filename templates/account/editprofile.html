@@ -36,6 +36,13 @@
 						<div class="form-group col-md-6">
 							<label>Phone Number</label>
 							{{user_form.phone_number}}
+							{% if user_form.phone_number.errors %}
+							<ul class="errorlist">
+								{% for error in user_form.phone_number.errors %}
+									<li style="color :red">{{ error }}</li>
+								{% endfor %}
+							</ul>
+						{% endif %}
 						</div>
 						
 					</div>

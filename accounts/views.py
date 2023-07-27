@@ -142,6 +142,8 @@ def activate(request,uidb64,token):
         user.is_active = True
         user.save()
         referral_code = request.session.get('referral_code')
+        wallet= Wallet.objects.create(user=user,balance=0)
+        
         print('referral',referral_code)
         print('before')
         
